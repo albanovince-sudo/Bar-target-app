@@ -5,454 +5,195 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Obiettivo Mensile — Bar</title>
 
-  <!-- ICONA (carica icon.png nella root del repo) -->
+  <!-- Icona (metti icon.png nella root del repo) -->
   <link rel="apple-touch-icon" href="icon.png">
-
-  <!-- PWA Manifest (opzionale, se usi PWA) -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- STILI -->
   <style>
     :root{
-      --brand:#ff7a00;    /* colore principale */
-      --brand-ink:#8a3d00;
-      --bg:#fff8f0;       /* sfondo caldo */
+      --brand:#ff7a00;
+      --bg:#fff8f0;
       --card:#ffffff;
       --ink:#1f1f1f;
       --muted:#6b6b6b;
       --ring:#e9e9e9;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color:var(--ink);
-      background:var(--bg);
-    }
-
-    /* Header */
-    header{
-      position:sticky; top:0; z-index:10;
-      background: linear-gradient(135deg, var(--brand), #ff9c3a);
-      color:#fff; padding:16px;
-      box-shadow:0 4px 16px rgba(0,0,0,.12);
-    }
-    header .title{
-      font-weight:800; letter-spacing:.3px; font-size:18px; margin:0;
-    }
-
-    main{ max-width: 900px; margin:0 auto; padding:16px }
-
-    /* Navigazione mese */
-    .monthNav{
-      display:flex; gap:10px; align-items:center; justify-content:space-between;
-      background:var(--card); border:1px solid var(--ring); border-radius:14px; padding:12px 12px;
-      box-shadow:0 6px 18px rgba(0,0,0,.04);
-      margin-top:12px;
-    }
-    .pill{padding:6px 12px; background:#ffe6d1; color:var(--brand-ink); border-radius:999px; font-weight:700}
-    .btn{
-      cursor:pointer; border:0; padding:10px 12px; border-radius:10px; font-weight:600;
-      background:#f0f0f0; color:#222;
-    }
-    .btn.primary{ background:var(--brand); color:#fff }
-    .btn.danger{ background:#e53935; color:#fff }
-
-    /* Cards & layout */
-    .grid{ display:grid; grid-template-columns:1fr; gap:14px; margin-top:14px }
-    @media(min-width: 860px){ .grid{ grid-template-columns: 1fr 1fr } }
-    .card{
-      background:var(--card); border:1px solid var(--ring); border-radius:14px; padding:16px;
-      box-shadow:0 6px 18px rgba(0,0,0,.04);
-    }
-    h2{ margin:0 0 8px 0; font-size:18px }
-
-    label{ display:block; font-size:14px; color:var(--muted); margin-bottom:6px }
-    input[type="number"], input[type="date"]{
-      width:100%; padding:12px; border:1px solid var(--ring); border-radius:10px; font-size:16px; outline:none;
-      background:#fff;
-    }
-    input[type="number"]:focus, input[type="date"]:focus{ border-color:var(--brand) }
-
-    .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap }
-    .row > *{ flex:1 }
-
-    /* KPI */
-    .kpi{ display:flex; justify-content:space-between; align-items:baseline; margin:6px 0 }
-    .kpi .label{ color:var(--muted); font-size:14px }
-    .kpi .value{ font-weight:800; font-size:22px }
-
-    /* Barra di avanzamento */
-    .progress-wrap{ background:#eee; border-radius:999px; overflow:hidden; height:18px; margin-top:8px }
-    .progress{ background:var(--brand); height:100%; width:0%; color:#fff; text-align:center; font-size:12px; line-height:18px; transition:width .4s }
-
-    /* Tabella */
-    table{ width:100%; border-collapse:collapse; font-size:14px }
-    th, td{ padding:8px; border-bottom:1px dashed #e6e6e6; text-align:center }
-    th{ color:#777; font-weight:700; background:#fafafa }
-
-    /* Admin badge & button */
-    .admin-badge {font-size:12px;background:#eee;padding:6px 10px;border-radius:999px;margin-left:8px}
-    .admin-btn {background:#f0f0f0;color:#222;border:0;padding:10px 12px;border-radius:10px;cursor:pointer}
-    .admin-btn[disabled]{opacity:.5;pointer-events:none}
-
-    footer{ padding:24px 16px; color:#777; text-align:center }
-    .muted{ color:var(--muted) }
+    body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    header{background:var(--brand);color:#fff;padding:16px;font-weight:bold;font-size:18px}
+    main{max-width:900px;margin:0 auto;padding:16px}
+    .grid{display:grid;gap:14px}
+    @media(min-width:860px){.grid{grid-template-columns:1fr 1fr}}
+    .card{background:var(--card);border:1px solid var(--ring);border-radius:14px;padding:16px;margin-top:14px}
+    h2{margin-top:0}
+    label{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
+    input{width:100%;padding:10px;border:1px solid var(--ring);border-radius:10px;font-size:16px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .row>*{flex:1}
+    .btn{cursor:pointer;border:0;padding:10px 12px;border-radius:10px;font-weight:600;background:#f0f0f0}
+    .btn.primary{background:var(--brand);color:#fff}
+    .btn.danger{background:#e53935;color:#fff}
+    .progress-wrap{background:#eee;border-radius:999px;overflow:hidden;height:18px;margin-top:8px}
+    .progress{background:var(--brand);height:100%;width:0%;color:#fff;text-align:center;font-size:12px;line-height:18px}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:8px;border-bottom:1px solid #eee;text-align:center}
+    th{background:#fafafa}
+    .admin-badge{font-size:12px;background:#eee;padding:6px 10px;border-radius:999px;margin-left:8px}
+    .admin-btn{background:#f0f0f0;color:#222;border:0;padding:10px 12px;border-radius:10px;cursor:pointer}
   </style>
 </head>
 <body>
-  <header>
-    <p class="title">📊 Obiettivo Mensile — Bar</p>
-  </header>
+  <header>📊 Obiettivo Mensile — Bar</header>
 
   <main>
-    <!-- Navigazione mese -->
-    <div class="monthNav">
-      <button class="btn" id="prevBtn">◀︎ Mese prec.</button>
-      <div class="pill" id="monthLabel">Mese Anno</div>
-      <button class="btn" id="nextBtn">Mese succ. ▶︎</button>
-    </div>
-
     <div class="grid">
-      <!-- Impostazioni & Inserimento -->
       <section class="card">
-        <h2>Impostazioni & Inserimento</h2>
-        <label for="goalInput">Obiettivo mensile (€)</label>
+        <h2>Impostazioni</h2>
+        <label>Obiettivo mensile (€)</label>
         <div class="row">
-          <input type="number" id="goalInput" min="0" step="0.01" placeholder="Es. 30000">
+          <input type="number" id="goalInput" placeholder="es. 30000">
           <button class="btn primary" id="saveGoalBtn">Imposta</button>
         </div>
-
-        <div class="row" style="margin-top:10px">
-          <div>
-            <label for="dateInput">Data</label>
-            <input type="date" id="dateInput">
-          </div>
-          <div>
-            <label for="amountInput">Incasso giornaliero (€)</label>
-            <input type="number" id="amountInput" min="0" step="0.01" placeholder="Es. 500">
-          </div>
+        <div class="row">
+          <input type="date" id="dateInput">
+          <input type="number" id="amountInput" placeholder="Incasso giornaliero">
         </div>
-
-        <div class="row" style="margin-top:10px">
+        <div class="row">
           <button class="btn primary" id="addBtn">Aggiungi</button>
-          <button class="btn" id="quick50" type="button">+50</button>
-          <button class="btn" id="quick100" type="button">+100</button>
         </div>
-
-        <p class="muted" style="margin-top:8px">I dati sono salvati nel browser per ogni mese (localStorage per dispositivo).</p>
       </section>
 
-      <!-- Dashboard -->
       <section class="card">
         <h2>Stato del mese</h2>
-        <div class="kpi"><div class="label">Obiettivo</div><div class="value" id="goalVal">€0</div></div>
-        <div class="kpi"><div class="label">Incassi totali</div><div class="value" id="totalVal">€0</div></div>
-        <div class="kpi"><div class="label">Bonus 5%</div><div class="value" id="bonusVal">€0</div></div>
-
-        <div class="progress-wrap" style="margin-top:8px">
+        <p>Obiettivo: <span id="goalVal">€0</span></p>
+        <p>Totale incassi: <span id="totalVal">€0</span></p>
+        <p>Bonus 5%: <span id="bonusVal">€0</span></p>
+        <div class="progress-wrap">
           <div class="progress" id="progressBar">0%</div>
         </div>
-
-        <div class="row" style="margin-top:10px">
-          <button class="btn" id="exportBtn">⬇︎ Esporta CSV</button>
-          <button class="btn danger" id="resetBtn">🔄 Reset mese</button>
+        <div class="row">
+          <button class="btn" id="exportBtn">Esporta CSV</button>
+          <button class="btn danger" id="resetBtn">Reset</button>
         </div>
       </section>
     </div>
 
-    <!-- Grafico -->
     <section class="card">
       <h2>Storico giornaliero</h2>
-      <div style="height:220px">
-        <canvas id="chart"></canvas>
-      </div>
+      <canvas id="chart" height="200"></canvas>
     </section>
 
-    <!-- Tabella -->
     <section class="card">
       <h2>Dettagli incassi</h2>
       <table>
-        <thead><tr><th>Data</th><th>Incasso (€)</th><th></th></tr></thead>
+        <thead><tr><th>Data</th><th>Incasso</th><th></th></tr></thead>
         <tbody id="rows"></tbody>
       </table>
     </section>
   </main>
 
-  <footer>© App incassi — uso interno</footer>
-
-  <!-- ===== SCRIPT PRINCIPALE: salvataggio locale per mese + UI ===== -->
   <script>
-    // ======= Utility =======
-    const fmt = (n)=> new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n||0));
-    const monthKey = (d)=> d.toISOString().slice(0,7); // YYYY-MM
+    // === Utility & Storage ===
+    const fmt = n=> new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n||0));
+    const monthKey = d=> d.toISOString().slice(0,7);
     let currentMonth = monthKey(new Date());
+    function kGoal(m){return `goal:${m}`}
+    function kEntries(m){return `entries:${m}`}
+    function loadGoal(m){return Number(localStorage.getItem(kGoal(m))||0)}
+    function saveGoal(m,v){localStorage.setItem(kGoal(m),String(v))}
+    function loadEntries(m){return JSON.parse(localStorage.getItem(kEntries(m))||'[]')}
+    function saveEntries(m,arr){localStorage.setItem(kEntries(m),JSON.stringify(arr))}
 
-    // ======= Storage helpers (per mese) =======
-    function kGoal(m){ return \`barapp:goal:\${m}\` }
-    function kEntries(m){ return \`barapp:entries:\${m}\` }
+    // === UI refs ===
+    const goalInput=document.getElementById('goalInput');
+    const saveGoalBtn=document.getElementById('saveGoalBtn');
+    const dateInput=document.getElementById('dateInput');
+    const amountInput=document.getElementById('amountInput');
+    const addBtn=document.getElementById('addBtn');
+    const resetBtn=document.getElementById('resetBtn');
+    const exportBtn=document.getElementById('exportBtn');
+    const goalVal=document.getElementById('goalVal');
+    const totalVal=document.getElementById('totalVal');
+    const bonusVal=document.getElementById('bonusVal');
+    const progressBar=document.getElementById('progressBar');
+    const rows=document.getElementById('rows');
 
-    function loadGoal(m){ return Number(localStorage.getItem(kGoal(m))||0) }
-    function saveGoal(m,v){ localStorage.setItem(kGoal(m), String(v)) }
+    // === Chart ===
+    const ctx=document.getElementById('chart').getContext('2d');
+    let chart=new Chart(ctx,{type:'bar',data:{labels:[],datasets:[{label:'Incasso (€)',data:[],backgroundColor:'#ff7a00'}]},options:{scales:{y:{beginAtZero:true}}}});
 
-    function loadEntries(m){
-      try{ return JSON.parse(localStorage.getItem(kEntries(m))||'[]') }catch(e){ return [] }
-    }
-    function saveEntries(m,arr){
-      localStorage.setItem(kEntries(m), JSON.stringify(arr))
-    }
-
-    // ======= Riferimenti UI =======
-    const monthLabel = document.getElementById('monthLabel');
-    const goalInput = document.getElementById('goalInput');
-    const saveGoalBtn = document.getElementById('saveGoalBtn');
-    const dateInput = document.getElementById('dateInput');
-    const amountInput = document.getElementById('amountInput');
-    const addBtn = document.getElementById('addBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const exportBtn = document.getElementById('exportBtn');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-
-    const goalVal = document.getElementById('goalVal');
-    const totalVal = document.getElementById('totalVal');
-    const bonusVal = document.getElementById('bonusVal');
-    const progressBar = document.getElementById('progressBar');
-    const rows = document.getElementById('rows');
-
-    // Chart
-    const ctx = document.getElementById('chart').getContext('2d');
-    let chart = new Chart(ctx, {
-      type:'bar',
-      data:{ labels:[], datasets:[{ label:'Incasso giornaliero (€)', data:[], backgroundColor:'#ff7a00' }] },
-      options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
-    });
-
-    function setMonth(m){
-      currentMonth = m;
-      if(monthLabel){
-        const [yy,mm] = m.split('-');
-        const it = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
-        monthLabel.textContent = \`\${it[Number(mm)-1]} \${yy}\`;
-      }
-      // data di default dentro il mese
-      const today = new Date();
-      if (monthKey(today)!==m) {
-        dateInput.value = \`\${m}-01\`;
-      } else {
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth()+1).padStart(2,'0');
-        const dd = String(today.getDate()).padStart(2,'0');
-        dateInput.value = \`\${yyyy}-\${mm}-\${dd}\`;
-      }
-      render();
-    }
-
+    // === Funzioni ===
     function render(){
-      const goal = loadGoal(currentMonth);
-      const entries = loadEntries(currentMonth);
-      goalInput.value = goal || '';
-      goalVal.textContent = fmt(goal);
-
-      const total = entries.reduce((s,e)=> s + Number(e.amount||0), 0);
-      totalVal.textContent = fmt(total);
-      bonusVal.textContent = fmt(total * 0.05);
-
-      let pct = goal>0 ? Math.min(100, (total/goal)*100) : 0;
-      progressBar.style.width = pct.toFixed(1) + '%';
-      progressBar.textContent  = Math.floor(pct) + '%';
-
+      const goal=loadGoal(currentMonth);
+      const entries=loadEntries(currentMonth);
+      goalInput.value=goal||'';
+      goalVal.textContent=fmt(goal);
+      const total=entries.reduce((s,e)=>s+Number(e.amount),0);
+      totalVal.textContent=fmt(total);
+      bonusVal.textContent=fmt(total*0.05);
+      let pct=goal>0?Math.min(100,(total/goal)*100):0;
+      progressBar.style.width=pct+'%';
+      progressBar.textContent=Math.floor(pct)+'%';
       // tabella
-      rows.innerHTML = '';
-      entries
-        .slice()
-        .sort((a,b)=> a.date.localeCompare(b.date))
-        .forEach((e,i)=>{
-          const tr = document.createElement('tr');
-          tr.innerHTML = \`
-            <td>\${e.date}</td>
-            <td>\${Number(e.amount).toFixed(2)}</td>
-            <td><button class="btn" data-i="\${i}">Elimina</button></td>\`;
-          rows.appendChild(tr);
-        });
-      rows.querySelectorAll('button[data-i]').forEach(btn=>{
-        btn.onclick = ()=>{
-          const arr = loadEntries(currentMonth);
-          arr.splice(Number(btn.dataset.i),1);
-          saveEntries(currentMonth, arr);
-          render();
-        };
+      rows.innerHTML='';
+      entries.forEach((e,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${e.date}</td><td>${fmt(e.amount)}</td><td><button data-i="${i}">Elimina</button></td>`;
+        rows.appendChild(tr);
       });
-
-      // chart per giorno
-      const byDay = {};
-      for(const e of entries){ byDay[e.date] = (byDay[e.date]||0) + Number(e.amount||0) }
-      const labels = Object.keys(byDay).sort();
-      const data = labels.map(d=> byDay[d]);
-      chart.data.labels = labels;
-      chart.data.datasets[0].data = data;
-      chart.update();
+      rows.querySelectorAll('button').forEach(btn=>{
+        btn.onclick=()=>{if(!isAdmin){alert('Solo Admin');return;}
+          const arr=loadEntries(currentMonth);arr.splice(btn.dataset.i,1);saveEntries(currentMonth,arr);render();}
+      });
+      // chart
+      const byDay={};entries.forEach(e=>{byDay[e.date]=(byDay[e.date]||0)+Number(e.amount)});
+      const labels=Object.keys(byDay).sort();const data=labels.map(d=>byDay[d]);
+      chart.data.labels=labels;chart.data.datasets[0].data=data;chart.update();
     }
 
-    function addEntry(dateStr, amount){
-      if(!dateStr){ alert('Seleziona una data'); return }
-      const val = Number(amount);
-      if(!(val>0)){ alert('Inserisci un importo valido'); return }
-      const entries = loadEntries(currentMonth);
-      entries.push({ date: dateStr, amount: val });
-      saveEntries(currentMonth, entries);
-      amountInput.value = '';
-      render();
+    function addEntry(dateStr,amount){
+      if(!isAdmin){alert('Solo Admin');return;}
+      if(!dateStr||!(amount>0))return;
+      const arr=loadEntries(currentMonth);arr.push({date:dateStr,amount:Number(amount)});
+      saveEntries(currentMonth,arr);amountInput.value='';render();
     }
 
-    // Eventi
-    document.getElementById('quick50').onclick  = ()=>{ amountInput.value = '50';  addBtn.click(); };
-    document.getElementById('quick100').onclick = ()=>{ amountInput.value = '100'; addBtn.click(); };
-
-    saveGoalBtn.onclick = ()=>{
-      const v = Number(goalInput.value);
-      if(!(v>0)){ alert('Imposta un obiettivo maggiore di 0'); return; }
-      saveGoal(currentMonth, v);
-      render();
-      alert('Obiettivo salvato');
-    };
-
-    addBtn.onclick = ()=> addEntry(dateInput.value, amountInput.value);
-
-    resetBtn.onclick = ()=>{
-      if(!confirm('Cancellare tutti i dati del mese?')) return;
-      saveEntries(currentMonth, []);
-      render();
-    };
-
-    exportBtn.onclick = ()=>{
-      const entries = loadEntries(currentMonth);
-      if(!entries.length){ alert('Nessun dato da esportare'); return; }
-      let csv = 'Data,Incasso\n' + entries
-        .sort((a,b)=>a.date.localeCompare(b.date))
-        .map(e=> \`\${e.date},\${Number(e.amount).toFixed(2)}\`).join('\\n');
-      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download=\`incassi_\${currentMonth}.csv\`; a.click();
-      URL.revokeObjectURL(url);
-    };
-
-    prevBtn.onclick = ()=>{
-      const [y,m] = currentMonth.split('-').map(Number);
-      const d = new Date(y, m-2, 1);
-      setMonth(monthKey(d));
-    };
-    nextBtn.onclick = ()=>{
-      const [y,m] = currentMonth.split('-').map(Number);
-      const d = new Date(y, m, 1);
-      setMonth(monthKey(d));
-    };
-
-    // Boot
-    (function init(){
-      setMonth(currentMonth);
-    })();
-  </script>
-
-  <!-- ===== SCRIPT: LOGIN ADMIN CON PIN (gating in capture) ===== -->
-<script>
-(function(){
-  const ADMIN_PIN = '1234'; // <-- cambia PIN qui
-  let isAdmin = localStorage.getItem('barapp:isAdmin') === 'true';
-
-  // intercetto click PRIMA degli altri handler
-  function guardAction(e){
-    if (isAdmin) return;           // admin: lascia passare
-    e.stopImmediatePropagation();   // blocca altri handler
-    e.preventDefault();             // evita azione
-    alert('Solo Admin può eseguire questa azione.');
-  }
-
-  window.addEventListener('load', () => {
-    // proteggi i pulsanti chiave
-    ['saveGoalBtn','addBtn','resetBtn'].forEach(id=>{
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('click', guardAction, {capture:true});
-    });
-
-    // proteggi i bottoni "Elimina" nella tabella (delegato sul tbody)
-    const rows = document.getElementById('rows');
-    if (rows) {
-      rows.addEventListener('click', (e)=>{
-        const t = e.target;
-        if (t && t.tagName === 'BUTTON' && !isAdmin) {
-          e.stopImmediatePropagation();
-          e.preventDefault();
-          alert('Solo Admin può eseguire questa azione.');
-        }
-      }, {capture:true});
+    // === Eventi ===
+    saveGoalBtn.onclick=()=>{if(!isAdmin){alert('Solo Admin');return;}
+      const v=Number(goalInput.value);if(!(v>0))return;saveGoal(currentMonth,v);render();}
+    addBtn.onclick=()=>addEntry(dateInput.value,amountInput.value);
+    resetBtn.onclick=()=>{if(!isAdmin){alert('Solo Admin');return;}
+      if(confirm('Cancellare tutto?')){saveEntries(currentMonth,[]);render();}}
+    exportBtn.onclick=()=>{
+      const arr=loadEntries(currentMonth);let csv='Data,Incasso\n'+arr.map(e=>`${e.date},${e.amount}`).join('\n');
+      const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download=`incassi_${currentMonth}.csv`;a.click();URL.revokeObjectURL(url);
     }
 
-    // Barra admin (login/logout + stato)
-    const adminBar = document.createElement('div');
-    adminBar.style.display='flex';
-    adminBar.style.justifyContent='center';
-    adminBar.style.margin='12px 0';
-
-    const adminBtn = document.createElement('button');
-    adminBtn.textContent = isAdmin ? '🔓 Esci da Admin' : '🔐 Login Admin';
-    adminBtn.style.background='#f0f0f0';
-    adminBtn.style.color='#222';
-    adminBtn.style.border=0;
-    adminBtn.style.padding='10px 12px';
-    adminBtn.style.borderRadius='10px';
-    adminBtn.style.cursor='pointer';
-
-    const statusSpan = document.createElement('span');
-    statusSpan.textContent = isAdmin ? 'ADMIN' : 'sola lettura';
-    statusSpan.style.fontSize='12px';
-    statusSpan.style.background = isAdmin ? '#ffe3cc' : '#eee';
-    statusSpan.style.padding='6px 10px';
-    statusSpan.style.borderRadius='999px';
-    statusSpan.style.marginLeft='8px';
-
-    adminBar.appendChild(adminBtn);
-    adminBar.appendChild(statusSpan);
-    document.body.appendChild(adminBar);
-
-    adminBtn.onclick = ()=>{
-      if (isAdmin) {
-        isAdmin = false;
-        localStorage.setItem('barapp:isAdmin','false');
-        adminBtn.textContent = '🔐 Login Admin';
-        statusSpan.textContent = 'sola lettura';
-        statusSpan.style.background = '#eee';
-        alert('Sei uscito dalla modalità Admin.');
-      } else {
-        const pin = prompt('Inserisci PIN admin:');
-        if (pin === ADMIN_PIN) {
-          isAdmin = true;
-          localStorage.setItem('barapp:isAdmin','true');
-          adminBtn.textContent = '🔓 Esci da Admin';
-          statusSpan.textContent = 'ADMIN';
-          statusSpan.style.background = '#ffe3cc';
-          alert('Accesso Admin riuscito.');
-        } else if (pin !== null) {
-          alert('PIN errato.');
-        }
-      }
-    };
-  });
-})();
-</script>
-</script>
-  </script>
-
-  <!-- ===== (OPZIONALE) REGISTRAZIONE SERVICE WORKER PER PWA ===== -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(console.error);
+    // === Admin con PIN ===
+    let isAdmin=localStorage.getItem('isAdmin')==='true';
+    const bar=document.createElement('div');
+    bar.style.textAlign='center';bar.style.margin='16px';
+    const adminBtn=document.createElement('button');
+    adminBtn.className='admin-btn';
+    const badge=document.createElement('span');
+    badge.className='admin-badge';
+    function updateAdminUI(){
+      adminBtn.textContent=isAdmin?'🔓 Esci Admin':'🔐 Login Admin';
+      badge.textContent=isAdmin?'ADMIN':'sola lettura';
+      badge.style.background=isAdmin?'#ffe3cc':'#eee';
     }
+    adminBtn.onclick=()=>{
+      if(isAdmin){isAdmin=false;localStorage.setItem('isAdmin','false');updateAdminUI();alert('Logout Admin')}
+      else{const pin=prompt('Inserisci PIN:');if(pin==='1234'){isAdmin=true;localStorage.setItem('isAdmin','true');updateAdminUI();alert('Accesso Admin')}
+      else alert('PIN errato');}}
+    updateAdminUI();
+    bar.appendChild(adminBtn);bar.appendChild(badge);document.body.appendChild(bar);
+
+    // init
+    (function init(){const today=new Date();dateInput.value=today.toISOString().slice(0,10);render();})();
   </script>
 </body>
 </html>
