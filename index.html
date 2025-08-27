@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obiettivo Mensile - Bar</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; background:#fff8f0; margin:0; padding:20px; }
+  h1 { text-align:center; color:#ff6600; }
+  .card { background:#fff; padding:15px; margin:15px 0; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+  input, button { padding:10px; margin:5px 0; font-size:16px; width:100%; }
+  .progress-container { background:#eee; border-radius:20px; overflow:hidden; margin-top:10px; }
+  .progress-bar { height:25px; background:#ff6600; width:0%; color:#fff; text-align:center; line-height:25px; transition:width .4s; }
+</style>
+</head>
+<body>
+
+<h1>📊 Obiettivo Mensile</h1>
+
+<div class="card">
+  <label>Obiettivo mensile (€):</label>
+  <input type="number" id="goal" value="30000">
+  <button onclick="setGoal()">Imposta</button>
+</div>
+
+<div class="card">
+  <label>Incasso giornaliero (€):</label>
+  <input type="number" id="daily" placeholder="Es. 500">
+  <button onclick="addDaily()">Aggiungi</button>
+</div>
+
+<div class="card">
+  <h3>Totale Incassi: €<span id="total">0</span></h3>
+  <h3>Bonus 5%: €<span id="bonus">0</span></h3>
+  <div class="progress-container">
+    <div id="progress" class="progress-bar">0%</div>
+  </div>
+</div>
+
+<div class="card">
+  <canvas id="chart" height="150"></canvas>
+</div>
+
+<script>
+let goal = 30000;
+let total = 0;
+let days = [];
+let amounts = [];
+
+const ctx = document.getElementById('chart').getContext('2d');
+let dailyChart = new Chart(ctx, {
+  type:'bar',
+  data:{ labels:[], datasets:[{label:'Incasso Giornaliero (€)', data:[], backgroundColor:'#ff6600'}]},
+  options:{ responsive:true, scales:{ y:{ beginAtZero:true }}}
+});
+
+function setGoal(){
+  goal = parseFloat(document.getElementById('goal').value);
+  updateUI();
+}
+
+function addDaily(){
+  let daily = parseFloat(document.getElementById('daily').value);
+  if(!daily) return;
+  let today = new Date().toLocaleDateString('it-IT');
+  days.push(today);
+  amounts.push(daily);
+  total += daily;
+  updateUI();
+  document.getElementById('daily').value="";
+}
+
+function updateUI(){
+  document.getElementById('total').innerText = total.toFixed(2);
+  document.getElementById('bonus').innerText = (total*0.05).toFixed(2);
+  let percent = Math.min((total/goal)*100,100);
+  document.getElementById('progress').style.width = percent+"%";
+  document.getElementById('progress').innerText = Math.floor(percent)+"%";
+  dailyChart.data.labels = days;
+  dailyChart.data.datasets[0].data = amounts;
+  dailyChart.update();
+}
+</script>
+
+</body>
+</html>
