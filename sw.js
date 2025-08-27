@@ -1,4 +1,4 @@
-const CACHE = 'barapp-v1';
+const CACHE = 'barapp-v5';
 const ASSETS = [
   './',
   './index.html',
