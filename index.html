@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Obiettivo Mensile — Bar</title>
+  <title>Obiettivo Mensile — Mast</title>
 
-  <!-- Icona (metti icon.png nella root del repo) -->
+  <!-- Icona (usa un file icon.png nella root se vuoi icona su iPhone) -->
   <link rel="apple-touch-icon" href="icon.png">
 
   <!-- Chart.js -->
@@ -13,187 +13,321 @@
 
   <style>
     :root{
-      --brand:#ff7a00;
-      --bg:#fff8f0;
+      --navy:#0d1b2a;        /* navy principale */
+      --navy-2:#1b263b;      /* navy secondario */
+      --accent:#3a7bd5;      /* blu acceso per elementi attivi */
+      --bg:#f5f7fb;          /* sfondo chiaro freddo */
       --card:#ffffff;
-      --ink:#1f1f1f;
-      --muted:#6b6b6b;
-      --ring:#e9e9e9;
+      --ink:#0d1b2a;
+      --muted:#6b7280;
+      --ring:#e6e8ef;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-    header{background:var(--brand);color:#fff;padding:16px;font-weight:bold;font-size:18px}
-    main{max-width:900px;margin:0 auto;padding:16px}
+    body{
+      margin:0; background:var(--bg); color:var(--ink);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    /* HEADER */
+    header{
+      background: linear-gradient(135deg, var(--navy), var(--navy-2));
+      color:#fff; padding:14px 16px; position:sticky; top:0; z-index:10;
+      box-shadow:0 4px 16px rgba(0,0,0,.15);
+    }
+    .head-wrap{max-width:980px;margin:0 auto;display:flex;gap:12px;align-items:center}
+    .logo{
+      width:40px;height:40px;border-radius:8px;overflow:hidden;
+      display:flex;align-items:center;justify-content:center;background:#fff1;
+      border:1px solid #ffffff22
+    }
+    .logo img{max-width:100%;max-height:100%;display:block}
+    .title{
+      margin:0; font-weight:800; letter-spacing:.2px; font-size:18px; line-height:1.2;
+    }
+    .subtitle{margin:0;color:#c9d6ff;font-size:12px}
+
+    main{max-width:980px;margin:0 auto;padding:16px}
     .grid{display:grid;gap:14px}
-    @media(min-width:860px){.grid{grid-template-columns:1fr 1fr}}
-    .card{background:var(--card);border:1px solid var(--ring);border-radius:14px;padding:16px;margin-top:14px}
-    h2{margin-top:0}
+    @media(min-width:860px){ .grid{grid-template-columns:1fr 1fr} }
+
+    .card{
+      background:var(--card); border:1px solid var(--ring); border-radius:14px; padding:16px;
+      box-shadow:0 6px 18px rgba(13,27,42,.06);
+    }
+    h2{margin:0 0 8px 0;font-size:18px;color:var(--navy)}
     label{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
-    input{width:100%;padding:10px;border:1px solid var(--ring);border-radius:10px;font-size:16px}
+    input[type="number"],input[type="date"]{
+      width:100%;padding:12px;border:1px solid var(--ring);border-radius:10px;font-size:16px;background:#fff;outline:none
+    }
+    input:focus{border-color:var(--accent)}
     .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
     .row>*{flex:1}
-    .btn{cursor:pointer;border:0;padding:10px 12px;border-radius:10px;font-weight:600;background:#f0f0f0}
-    .btn.primary{background:var(--brand);color:#fff}
-    .btn.danger{background:#e53935;color:#fff}
-    .progress-wrap{background:#eee;border-radius:999px;overflow:hidden;height:18px;margin-top:8px}
-    .progress{background:var(--brand);height:100%;width:0%;color:#fff;text-align:center;font-size:12px;line-height:18px}
-    table{width:100%;border-collapse:collapse;margin-top:10px}
-    th,td{padding:8px;border-bottom:1px solid #eee;text-align:center}
-    th{background:#fafafa}
-    .admin-badge{font-size:12px;background:#eee;padding:6px 10px;border-radius:999px;margin-left:8px}
-    .admin-btn{background:#f0f0f0;color:#222;border:0;padding:10px 12px;border-radius:10px;cursor:pointer}
+
+    .btn{
+      cursor:pointer;border:0;padding:10px 12px;border-radius:10px;font-weight:700;background:#eef2ff;color:#0d1b2a
+    }
+    .btn.primary{background:var(--accent);color:#fff}
+    .btn.danger{background:#e63946;color:#fff}
+
+    .kpi{display:flex;justify-content:space-between;align-items:baseline;margin:6px 0}
+    .kpi .label{color:var(--muted);font-size:14px}
+    .kpi .value{font-weight:800;font-size:22px}
+
+    .progress-wrap{background:#e9edf7;border-radius:999px;overflow:hidden;height:18px;margin-top:8px}
+    .progress{background:var(--accent);height:100%;width:0%;color:#fff;text-align:center;font-size:12px;line-height:18px;transition:width .35s}
+
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+    th,td{padding:8px;border-bottom:1px dashed #e6e8ef;text-align:center}
+    th{background:#f7f8fc;color:#556; font-weight:700}
+
+    .admin-badge{font-size:12px;background:#e9edf7;padding:6px 10px;border-radius:999px;margin-left:8px}
+    .admin-btn{background:#eef2ff;color:#0d1b2a;border:0;padding:10px 12px;border-radius:10px;cursor:pointer}
+    footer{padding:24px 16px;color:#7b849a;text-align:center}
+    .muted{color:var(--muted)}
   </style>
 </head>
 <body>
-  <header>📊 Obiettivo Mensile — Bar</header>
+  <header>
+    <div class="head-wrap">
+      <div class="logo">
+        <!-- Carica un file logo.png nella root del repo -->
+        <img src="logo.png" alt="Logo Mast" onerror="this.style.display='none'">
+      </div>
+      <div>
+        <p class="title">📊 Obiettivo Mensile — Mast</p>
+        <p class="subtitle">Dashboard interna in sola lettura per lo staff (scrittura con PIN admin)</p>
+      </div>
+    </div>
+  </header>
 
   <main>
     <div class="grid">
+      <!-- IMPOSTAZIONI & INSERIMENTO -->
       <section class="card">
-        <h2>Impostazioni</h2>
+        <h2>Impostazioni & Inserimento</h2>
         <label>Obiettivo mensile (€)</label>
         <div class="row">
-          <input type="number" id="goalInput" placeholder="es. 30000">
+          <input type="number" id="goalInput" placeholder="es. 30000" min="0" step="0.01">
           <button class="btn primary" id="saveGoalBtn">Imposta</button>
         </div>
+
         <div class="row">
-          <input type="date" id="dateInput">
-          <input type="number" id="amountInput" placeholder="Incasso giornaliero">
+          <div>
+            <label>Data</label>
+            <input type="date" id="dateInput">
+          </div>
+          <div>
+            <label>Incasso giornaliero (€)</label>
+            <input type="number" id="amountInput" placeholder="es. 500" min="0" step="0.01">
+          </div>
         </div>
+
         <div class="row">
           <button class="btn primary" id="addBtn">Aggiungi</button>
+          <button class="btn" id="quick50" type="button">+50</button>
+          <button class="btn" id="quick100" type="button">+100</button>
         </div>
+
+        <p class="muted" style="margin-top:6px">I dati sono salvati sul dispositivo (localStorage) per mese.</p>
       </section>
 
+      <!-- DASHBOARD -->
       <section class="card">
         <h2>Stato del mese</h2>
-        <p>Obiettivo: <span id="goalVal">€0</span></p>
-        <p>Totale incassi: <span id="totalVal">€0</span></p>
-        <p>Bonus 5%: <span id="bonusVal">€0</span></p>
-        <div class="progress-wrap">
-          <div class="progress" id="progressBar">0%</div>
-        </div>
-        <div class="row">
-          <button class="btn" id="exportBtn">Esporta CSV</button>
-          <button class="btn danger" id="resetBtn">Reset</button>
+        <div class="kpi"><div class="label">Obiettivo</div><div class="value" id="goalVal">€0</div></div>
+        <div class="kpi"><div class="label">Incassi totali</div><div class="value" id="totalVal">€0</div></div>
+        <div class="kpi"><div class="label">Bonus 5%</div><div class="value" id="bonusVal">€0</div></div>
+
+        <div class="progress-wrap"><div class="progress" id="progressBar">0%</div></div>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="exportBtn">⬇︎ Esporta CSV</button>
+          <button class="btn danger" id="resetBtn">🔄 Reset mese</button>
         </div>
       </section>
     </div>
 
+    <!-- GRAFICO -->
     <section class="card">
       <h2>Storico giornaliero</h2>
-      <canvas id="chart" height="200"></canvas>
+      <div style="height:220px"><canvas id="chart"></canvas></div>
     </section>
 
+    <!-- TABELLA -->
     <section class="card">
       <h2>Dettagli incassi</h2>
       <table>
-        <thead><tr><th>Data</th><th>Incasso</th><th></th></tr></thead>
+        <thead><tr><th>Data</th><th>Incasso (€)</th><th></th></tr></thead>
         <tbody id="rows"></tbody>
       </table>
     </section>
   </main>
 
+  <footer>© Mast — uso interno</footer>
+
+  <!-- ===== SCRIPT PRINCIPALE ===== -->
   <script>
-    // === Utility & Storage ===
-    const fmt = n=> new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n||0));
-    const monthKey = d=> d.toISOString().slice(0,7);
+    // Utility
+    const fmt = n => new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n||0));
+    const monthKey = d => d.toISOString().slice(0,7);
     let currentMonth = monthKey(new Date());
-    function kGoal(m){return `goal:${m}`}
-    function kEntries(m){return `entries:${m}`}
-    function loadGoal(m){return Number(localStorage.getItem(kGoal(m))||0)}
-    function saveGoal(m,v){localStorage.setItem(kGoal(m),String(v))}
-    function loadEntries(m){return JSON.parse(localStorage.getItem(kEntries(m))||'[]')}
-    function saveEntries(m,arr){localStorage.setItem(kEntries(m),JSON.stringify(arr))}
 
-    // === UI refs ===
-    const goalInput=document.getElementById('goalInput');
-    const saveGoalBtn=document.getElementById('saveGoalBtn');
-    const dateInput=document.getElementById('dateInput');
-    const amountInput=document.getElementById('amountInput');
-    const addBtn=document.getElementById('addBtn');
-    const resetBtn=document.getElementById('resetBtn');
-    const exportBtn=document.getElementById('exportBtn');
-    const goalVal=document.getElementById('goalVal');
-    const totalVal=document.getElementById('totalVal');
-    const bonusVal=document.getElementById('bonusVal');
-    const progressBar=document.getElementById('progressBar');
-    const rows=document.getElementById('rows');
+    // Storage helpers
+    const kGoal   = m => `mast:goal:${m}`;
+    const kEntries= m => `mast:entries:${m}`;
+    const loadGoal   = m => Number(localStorage.getItem(kGoal(m))||0);
+    const saveGoal   = (m,v) => localStorage.setItem(kGoal(m), String(v));
+    const loadEntries= m => { try{return JSON.parse(localStorage.getItem(kEntries(m))||'[]')}catch(_){return[]} };
+    const saveEntries= (m,arr) => localStorage.setItem(kEntries(m), JSON.stringify(arr));
 
-    // === Chart ===
-    const ctx=document.getElementById('chart').getContext('2d');
-    let chart=new Chart(ctx,{type:'bar',data:{labels:[],datasets:[{label:'Incasso (€)',data:[],backgroundColor:'#ff7a00'}]},options:{scales:{y:{beginAtZero:true}}}});
+    // UI refs
+    const goalInput   = document.getElementById('goalInput');
+    const saveGoalBtn = document.getElementById('saveGoalBtn');
+    const dateInput   = document.getElementById('dateInput');
+    const amountInput = document.getElementById('amountInput');
+    const addBtn      = document.getElementById('addBtn');
+    const resetBtn    = document.getElementById('resetBtn');
+    const exportBtn   = document.getElementById('exportBtn');
+    const quick50     = document.getElementById('quick50');
+    const quick100    = document.getElementById('quick100');
 
-    // === Funzioni ===
+    const goalVal     = document.getElementById('goalVal');
+    const totalVal    = document.getElementById('totalVal');
+    const bonusVal    = document.getElementById('bonusVal');
+    const progressBar = document.getElementById('progressBar');
+    const rows        = document.getElementById('rows');
+
+    // Chart
+    const ctx = document.getElementById('chart').getContext('2d');
+    const chart = new Chart(ctx,{
+      type:'bar',
+      data:{labels:[],datasets:[{label:'Incasso (€)',data:[],backgroundColor:'#3a7bd5'}]},
+      options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}
+    });
+
+    // Render
     function render(){
-      const goal=loadGoal(currentMonth);
-      const entries=loadEntries(currentMonth);
-      goalInput.value=goal||'';
-      goalVal.textContent=fmt(goal);
-      const total=entries.reduce((s,e)=>s+Number(e.amount),0);
-      totalVal.textContent=fmt(total);
-      bonusVal.textContent=fmt(total*0.05);
-      let pct=goal>0?Math.min(100,(total/goal)*100):0;
-      progressBar.style.width=pct+'%';
-      progressBar.textContent=Math.floor(pct)+'%';
+      const goal = loadGoal(currentMonth);
+      const entries = loadEntries(currentMonth);
+
+      goalInput.value = goal || '';
+      goalVal.textContent = fmt(goal);
+
+      const total = entries.reduce((s,e)=> s + Number(e.amount||0), 0);
+      totalVal.textContent = fmt(total);
+      bonusVal.textContent = fmt(total*0.05);
+
+      const pct = goal>0 ? Math.min(100, (total/goal)*100) : 0;
+      progressBar.style.width = pct.toFixed(1)+'%';
+      progressBar.textContent = Math.floor(pct)+'%';
+
       // tabella
       rows.innerHTML='';
-      entries.forEach((e,i)=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${e.date}</td><td>${fmt(e.amount)}</td><td><button data-i="${i}">Elimina</button></td>`;
-        rows.appendChild(tr);
+      entries
+        .slice()
+        .sort((a,b)=>a.date.localeCompare(b.date))
+        .forEach((e,i)=>{
+          const tr=document.createElement('tr');
+          tr.innerHTML = `<td>${e.date}</td><td>${fmt(e.amount)}</td><td><button class="btn" data-i="${i}">Elimina</button></td>`;
+          rows.appendChild(tr);
+        });
+      rows.querySelectorAll('button[data-i]').forEach(btn=>{
+        btn.onclick = ()=>{
+          if(!isAdmin){ alert('Solo Admin'); return; }
+          const arr = loadEntries(currentMonth);
+          arr.splice(Number(btn.dataset.i),1);
+          saveEntries(currentMonth, arr);
+          render();
+        };
       });
-      rows.querySelectorAll('button').forEach(btn=>{
-        btn.onclick=()=>{if(!isAdmin){alert('Solo Admin');return;}
-          const arr=loadEntries(currentMonth);arr.splice(btn.dataset.i,1);saveEntries(currentMonth,arr);render();}
-      });
+
       // chart
-      const byDay={};entries.forEach(e=>{byDay[e.date]=(byDay[e.date]||0)+Number(e.amount)});
-      const labels=Object.keys(byDay).sort();const data=labels.map(d=>byDay[d]);
-      chart.data.labels=labels;chart.data.datasets[0].data=data;chart.update();
+      const byDay = {};
+      for(const e of entries){ byDay[e.date] = (byDay[e.date]||0) + Number(e.amount||0) }
+      const labels = Object.keys(byDay).sort();
+      const data = labels.map(d=> byDay[d]);
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = data;
+      chart.update();
     }
 
-    function addEntry(dateStr,amount){
-      if(!isAdmin){alert('Solo Admin');return;}
-      if(!dateStr||!(amount>0))return;
-      const arr=loadEntries(currentMonth);arr.push({date:dateStr,amount:Number(amount)});
-      saveEntries(currentMonth,arr);amountInput.value='';render();
+    function addEntry(dateStr, amount){
+      if(!isAdmin){ alert('Solo Admin'); return; }
+      const val = Number(amount);
+      if(!dateStr || !(val>0)){ alert('Inserisci una data e un importo valido'); return; }
+      const arr = loadEntries(currentMonth);
+      arr.push({date:dateStr, amount:val});
+      saveEntries(currentMonth, arr);
+      amountInput.value='';
+      render();
     }
 
-    // === Eventi ===
-    saveGoalBtn.onclick=()=>{if(!isAdmin){alert('Solo Admin');return;}
-      const v=Number(goalInput.value);if(!(v>0))return;saveGoal(currentMonth,v);render();}
-    addBtn.onclick=()=>addEntry(dateInput.value,amountInput.value);
-    resetBtn.onclick=()=>{if(!isAdmin){alert('Solo Admin');return;}
-      if(confirm('Cancellare tutto?')){saveEntries(currentMonth,[]);render();}}
-    exportBtn.onclick=()=>{
-      const arr=loadEntries(currentMonth);let csv='Data,Incasso\n'+arr.map(e=>`${e.date},${e.amount}`).join('\n');
-      const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');a.href=url;a.download=`incassi_${currentMonth}.csv`;a.click();URL.revokeObjectURL(url);
-    }
+    // Eventi
+    saveGoalBtn.onclick = ()=>{
+      if(!isAdmin){ alert('Solo Admin'); return; }
+      const v = Number(goalInput.value);
+      if(!(v>0)){ alert('Obiettivo > 0'); return; }
+      saveGoal(currentMonth, v);
+      render();
+      alert('Obiettivo salvato');
+    };
+    addBtn.onclick = ()=> addEntry(dateInput.value, amountInput.value);
+    quick50.onclick  = ()=>{ amountInput.value='50';  addBtn.click(); };
+    quick100.onclick = ()=>{ amountInput.value='100'; addBtn.click(); };
+    resetBtn.onclick = ()=>{
+      if(!isAdmin){ alert('Solo Admin'); return; }
+      if(confirm('Cancellare tutti i dati del mese corrente?')){
+        saveEntries(currentMonth, []);
+        render();
+      }
+    };
+    exportBtn.onclick = ()=>{
+      const entries = loadEntries(currentMonth);
+      if(!entries.length){ alert('Nessun dato'); return; }
+      let csv = 'Data,Incasso\n' + entries
+        .sort((a,b)=>a.date.localeCompare(b.date))
+        .map(e=> `${e.date},${Number(e.amount).toFixed(2)}`).join('\n');
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=`incassi_${currentMonth}.csv`; a.click();
+      URL.revokeObjectURL(url);
+    };
 
-    // === Admin con PIN ===
-    let isAdmin=localStorage.getItem('isAdmin')==='true';
-    const bar=document.createElement('div');
-    bar.style.textAlign='center';bar.style.margin='16px';
-    const adminBtn=document.createElement('button');
-    adminBtn.className='admin-btn';
-    const badge=document.createElement('span');
-    badge.className='admin-badge';
+    // Admin PIN
+    let isAdmin = localStorage.getItem('mast:isAdmin')==='true';
+    const adminBar = document.createElement('div');
+    adminBar.style.display='flex'; adminBar.style.justifyContent='center'; adminBar.style.margin='16px 0';
+    const adminBtn = document.createElement('button'); adminBtn.className='admin-btn';
+    const badge = document.createElement('span'); badge.className='admin-badge';
+
     function updateAdminUI(){
-      adminBtn.textContent=isAdmin?'🔓 Esci Admin':'🔐 Login Admin';
-      badge.textContent=isAdmin?'ADMIN':'sola lettura';
-      badge.style.background=isAdmin?'#ffe3cc':'#eee';
+      adminBtn.textContent = isAdmin ? '🔓 Esci Admin' : '🔐 Login Admin';
+      badge.textContent = isAdmin ? 'ADMIN' : 'sola lettura';
+      badge.style.background = isAdmin ? '#dbeafe' : '#e9edf7';
     }
-    adminBtn.onclick=()=>{
-      if(isAdmin){isAdmin=false;localStorage.setItem('isAdmin','false');updateAdminUI();alert('Logout Admin')}
-      else{const pin=prompt('Inserisci PIN:');if(pin==='1234'){isAdmin=true;localStorage.setItem('isAdmin','true');updateAdminUI();alert('Accesso Admin')}
-      else alert('PIN errato');}}
+    adminBtn.onclick = ()=>{
+      if(isAdmin){
+        isAdmin=false; localStorage.setItem('mast:isAdmin','false'); updateAdminUI(); alert('Logout Admin');
+      }else{
+        const pin = prompt('Inserisci PIN:');
+        if(pin==='1234'){ // CAMBIA QUI IL PIN
+          isAdmin=true; localStorage.setItem('mast:isAdmin','true'); updateAdminUI(); alert('Accesso Admin');
+        }else if(pin!==null){
+          alert('PIN errato');
+        }
+      }
+    };
     updateAdminUI();
-    bar.appendChild(adminBtn);bar.appendChild(badge);document.body.appendChild(bar);
+    adminBar.appendChild(adminBtn); adminBar.appendChild(badge);
+    document.body.appendChild(adminBar);
 
-    // init
-    (function init(){const today=new Date();dateInput.value=today.toISOString().slice(0,10);render();})();
+    // Init
+    (function init(){
+      const today=new Date();
+      const yyyy=today.getFullYear(), mm=String(today.getMonth()+1).padStart(2,'0'), dd=String(today.getDate()).padStart(2,'0');
+      document.getElementById('dateInput').value = `${yyyy}-${mm}-${dd}`;
+      render();
+    })();
   </script>
 </body>
 </html>
