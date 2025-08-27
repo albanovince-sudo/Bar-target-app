@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Obiettivo Mensile Bar</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #2E86C1; }
+    .container { max-width: 400px; margin: auto; }
+    .progress-bar { background: #ddd; border-radius: 10px; overflow: hidden; height: 30px; margin: 10px 0; }
+    .progress { background: #2E86C1; height: 100%; width: 0%; color: white; text-align: center; line-height: 30px; }
+    input, button { padding: 10px; margin: 5px 0; width: 100%; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📊 Obiettivo Mensile</h1>
+    <label>Obiettivo (€):</label>
+    <input type="number" id="goal" value="10000">
+    
+    <label>Incasso del giorno (€):</label>
+    <input type="number" id="daily">
+    <button onclick="addRevenue()">Aggiungi Incasso</button>
+    
+    <div class="progress-bar">
+        <div class="progress" id="progress">0%</div>
+    </div>
+    
+    <h2>💰 Bonus 5%: <span id="bonus">0</span> €</h2>
+    <h3>Totale Incassato: <span id="total">0</span> €</h3>
+</div>
+
+<script>
+    let total = 0;
+
+    function addRevenue() {
+        let daily = parseFloat(document.getElementById('daily').value);
+        let goal = parseFloat(document.getElementById('goal').value);
+        
+        if (isNaN(daily) || daily <= 0) {
+            alert("Inserisci un importo valido");
+            return;
+        }
+        
+        total += daily;
+        let percent = Math.min((total / goal) * 100, 100);
+        let bonus = total * 0.05;
+        
+        document.getElementById('progress').style.width = percent + "%";
+        document.getElementById('progress').textContent = Math.floor(percent) + "%";
+        document.getElementById('bonus').textContent = bonus.toFixed(2);
+        document.getElementById('total').textContent = total.toFixed(2);
+        
+        document.getElementById('daily').value = "";
+    }
+</script>
+
+</body>
+</html>
