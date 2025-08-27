@@ -359,112 +359,92 @@
     })();
   </script>
 
-  <!-- ===== SCRIPT: LOGIN ADMIN CON PIN (gating azioni) ===== -->
+  <!-- ===== SCRIPT: LOGIN ADMIN CON PIN (gating in capture) ===== -->
 <script>
 (function(){
-  // Cambia qui il PIN
-  const ADMIN_PIN = '1234';
-
-  // Riferimenti ai pulsanti di azione (già esistenti nel file)
-  const btnImposta  = document.getElementById('saveGoalBtn');
-  const btnAggiungi = document.getElementById('addBtn');
-  const btnReset    = document.getElementById('resetBtn');
-  const rowsTable   = document.getElementById('rows');
-
-  // Stato admin persistente sul dispositivo
+  const ADMIN_PIN = '1234'; // <-- cambia PIN qui
   let isAdmin = localStorage.getItem('barapp:isAdmin') === 'true';
 
-  // Crea barra admin (login/logout + stato) senza toccare i bottoni
-  const adminBar = document.createElement('div');
-  adminBar.style.display = 'flex';
-  adminBar.style.justifyContent = 'center';
-  adminBar.style.margin = '12px 0';
-
-  const adminBtn = document.createElement('button');
-  adminBtn.textContent = isAdmin ? '🔓 Esci da Admin' : '🔐 Login Admin';
-  adminBtn.style.background = '#f0f0f0';
-  adminBtn.style.color = '#222';
-  adminBtn.style.border = 0;
-  adminBtn.style.padding = '10px 12px';
-  adminBtn.style.borderRadius = '10px';
-  adminBtn.style.cursor = 'pointer';
-
-  const statusSpan = document.createElement('span');
-  statusSpan.textContent = isAdmin ? 'ADMIN' : 'sola lettura';
-  statusSpan.style.fontSize = '12px';
-  statusSpan.style.background = isAdmin ? '#ffe3cc' : '#eee';
-  statusSpan.style.padding = '6px 10px';
-  statusSpan.style.borderRadius = '999px';
-  statusSpan.style.marginLeft = '8px';
-
-  adminBar.appendChild(adminBtn);
-  adminBar.appendChild(statusSpan);
-  document.body.appendChild(adminBar);
-
-  // Funzione che permette l'azione solo se admin
-  function requireAdminOrAlert(){
-    if (isAdmin) return true;
+  // intercetto click PRIMA degli altri handler
+  function guardAction(e){
+    if (isAdmin) return;           // admin: lascia passare
+    e.stopImmediatePropagation();   // blocca altri handler
+    e.preventDefault();             // evita azione
     alert('Solo Admin può eseguire questa azione.');
-    return false;
   }
 
-  // Intercetta le azioni principali SENZA toccare la logica esistente
-  function wrapIfExists(btn, handlerName){
-    if(!btn) return;
-    // prendi l'handler eventualmente già assegnato nel codice principale
-    const original = btn.onclick ? btn.onclick.bind(btn) : null;
-    btn.onclick = function(){
-      if(!requireAdminOrAlert()) return;
-      if (original) return original();
-      // se non c'era un handler (caso raro), non facciamo nulla
-    };
-  }
-
-  wrapIfExists(btnImposta,  'imposta');
-  wrapIfExists(btnAggiungi, 'aggiungi');
-  wrapIfExists(btnReset,    'reset');
-
-  // Intercetta i bottoni "Elimina" della tabella quando vengono creati/aggiornati
-  // Osserva il tbody e wrappa i click su ogni nuovo bottone
-  if (rowsTable) {
-    const observer = new MutationObserver(()=>{
-      rowsTable.querySelectorAll('button').forEach(b=>{
-        if (b._wrapped) return; // evita doppi wrap
-        const orig = b.onclick ? b.onclick.bind(b) : null;
-        b.onclick = function(){
-          if(!requireAdminOrAlert()) return;
-          if (orig) return orig();
-        };
-        b._wrapped = true;
-      });
+  window.addEventListener('load', () => {
+    // proteggi i pulsanti chiave
+    ['saveGoalBtn','addBtn','resetBtn'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', guardAction, {capture:true});
     });
-    observer.observe(rowsTable, {childList:true, subtree:true});
-  }
 
-  // Login / logout admin
-  adminBtn.onclick = ()=>{
-    if (isAdmin) {
-      isAdmin = false;
-      localStorage.setItem('barapp:isAdmin','false');
-      adminBtn.textContent = '🔐 Login Admin';
-      statusSpan.textContent = 'sola lettura';
-      statusSpan.style.background = '#eee';
-      alert('Sei uscito dalla modalità Admin.');
-    } else {
-      const pin = prompt('Inserisci PIN admin:');
-      if (pin === ADMIN_PIN) {
-        isAdmin = true;
-        localStorage.setItem('barapp:isAdmin','true');
-        adminBtn.textContent = '🔓 Esci da Admin';
-        statusSpan.textContent = 'ADMIN';
-        statusSpan.style.background = '#ffe3cc';
-        alert('Accesso Admin riuscito.');
-      } else if (pin !== null) {
-        alert('PIN errato.');
-      }
+    // proteggi i bottoni "Elimina" nella tabella (delegato sul tbody)
+    const rows = document.getElementById('rows');
+    if (rows) {
+      rows.addEventListener('click', (e)=>{
+        const t = e.target;
+        if (t && t.tagName === 'BUTTON' && !isAdmin) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          alert('Solo Admin può eseguire questa azione.');
+        }
+      }, {capture:true});
     }
-  };
+
+    // Barra admin (login/logout + stato)
+    const adminBar = document.createElement('div');
+    adminBar.style.display='flex';
+    adminBar.style.justifyContent='center';
+    adminBar.style.margin='12px 0';
+
+    const adminBtn = document.createElement('button');
+    adminBtn.textContent = isAdmin ? '🔓 Esci da Admin' : '🔐 Login Admin';
+    adminBtn.style.background='#f0f0f0';
+    adminBtn.style.color='#222';
+    adminBtn.style.border=0;
+    adminBtn.style.padding='10px 12px';
+    adminBtn.style.borderRadius='10px';
+    adminBtn.style.cursor='pointer';
+
+    const statusSpan = document.createElement('span');
+    statusSpan.textContent = isAdmin ? 'ADMIN' : 'sola lettura';
+    statusSpan.style.fontSize='12px';
+    statusSpan.style.background = isAdmin ? '#ffe3cc' : '#eee';
+    statusSpan.style.padding='6px 10px';
+    statusSpan.style.borderRadius='999px';
+    statusSpan.style.marginLeft='8px';
+
+    adminBar.appendChild(adminBtn);
+    adminBar.appendChild(statusSpan);
+    document.body.appendChild(adminBar);
+
+    adminBtn.onclick = ()=>{
+      if (isAdmin) {
+        isAdmin = false;
+        localStorage.setItem('barapp:isAdmin','false');
+        adminBtn.textContent = '🔐 Login Admin';
+        statusSpan.textContent = 'sola lettura';
+        statusSpan.style.background = '#eee';
+        alert('Sei uscito dalla modalità Admin.');
+      } else {
+        const pin = prompt('Inserisci PIN admin:');
+        if (pin === ADMIN_PIN) {
+          isAdmin = true;
+          localStorage.setItem('barapp:isAdmin','true');
+          adminBtn.textContent = '🔓 Esci da Admin';
+          statusSpan.textContent = 'ADMIN';
+          statusSpan.style.background = '#ffe3cc';
+          alert('Accesso Admin riuscito.');
+        } else if (pin !== null) {
+          alert('PIN errato.');
+        }
+      }
+    };
+  });
 })();
+</script>
 </script>
   </script>
 
