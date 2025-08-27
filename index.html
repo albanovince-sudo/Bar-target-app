@@ -1,179 +1,442 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="apple-touch-icon" href="icon.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Obiettivo Mensile — Bar</title>
+
+  <!-- ICONA (carica icon.png nella root del repo) -->
   <link rel="apple-touch-icon" href="icon.png">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Obiettivo Mensile - Bar</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-  body { font-family: Arial, sans-serif; background:#fff8f0; margin:0; padding:20px; }
-  h1 { text-align:center; color:#ff6600; }
-  .card { background:#fff; padding:15px; margin:15px 0; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-  input, button { padding:10px; margin:5px 0; font-size:16px; width:100%; }
-  .progress-container { background:#eee; border-radius:20px; overflow:hidden; margin-top:10px; }
-  .progress-bar { height:25px; background:#ff6600; width:0%; color:#fff; text-align:center; line-height:25px; transition:width .4s; }
-</style>
-<style>
-  .admin-badge {font-size:12px;background:#eee;padding:6px 10px;border-radius:999px;margin-left:8px}
-  .admin-btn {background:#f0f0f0;color:#222;border:0;padding:10px 12px;border-radius:10px;cursor:pointer}
-  .admin-btn[disabled]{opacity:.5;pointer-events:none}
-</style>
-</head>
-  <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(console.error);
-}
-</script>
-<body>
 
-<h1>📊 Obiettivo Mensile</h1>
+  <!-- PWA Manifest (opzionale, se usi PWA) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
 
-<div class="card">
-  <label>Obiettivo mensile (€):</label>
-  <input type="number" id="goal" value="30000">
-  <button onclick="setGoal()">Imposta</button>
-</div>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="card">
-  <label>Incasso giornaliero (€):</label>
-  <input type="number" id="daily" placeholder="Es. 500">
-  <button onclick="addDaily()">Aggiungi</button>
-</div>
-
-<div class="card">
-  <h3>Totale Incassi: €<span id="total">0</span></h3>
-  <h3>Bonus 5%: €<span id="bonus">0</span></h3>
-  <div class="progress-container">
-    <div id="progress" class="progress-bar">0%</div>
-  </div>
-</div>
-
-<div class="card">
-  <canvas id="chart" height="150"></canvas>
-</div>
-
-<script>
-let goal = 30000;
-let total = 0;
-let days = [];
-let amounts = [];
-
-const ctx = document.getElementById('chart').getContext('2d');
-let dailyChart = new Chart(ctx, {
-  type:'bar',
-  data:{ labels:[], datasets:[{label:'Incasso Giornaliero (€)', data:[], backgroundColor:'#ff6600'}]},
-  options:{ responsive:true, scales:{ y:{ beginAtZero:true }}}
-});
-
-function setGoal(){
-  goal = parseFloat(document.getElementById('goal').value);
-  updateUI();
-}
-
-function addDaily(){
-  let daily = parseFloat(document.getElementById('daily').value);
-  if(!daily) return;
-  let today = new Date().toLocaleDateString('it-IT');
-  days.push(today);
-  amounts.push(daily);
-  total += daily;
-  updateUI();
-  document.getElementById('daily').value="";
-}
-
-function updateUI(){
-  document.getElementById('total').innerText = total.toFixed(2);
-  document.getElementById('bonus').innerText = (total*0.05).toFixed(2);
-  let percent = Math.min((total/goal)*100,100);
-  document.getElementById('progress').style.width = percent+"%";
-  document.getElementById('progress').innerText = Math.floor(percent)+"%";
-  dailyChart.data.labels = days;
-  dailyChart.data.datasets[0].data = amounts;
-  dailyChart.update();
-}
-</script>
-<script>
-// ============== CONFIG PIN ==============
-const ADMIN_PIN = '1234'; // <-- CAMBIALO tu! Esempio: '5791'
-
-// ============== SELETTORE UI (adegua agli ID già presenti) ==============
-const btnImposta = document.getElementById('saveGoalBtn');
-const btnAggiungi = document.getElementById('addBtn');
-const btnReset = document.getElementById('resetBtn');
-const rowsTable = document.getElementById('rows'); // tabella righe, se esiste
-
-// stato admin persistente (locale al device)
-let isAdmin = localStorage.getItem('barapp:isAdmin') === 'true';
-
-// abilita/disabilita azioni di scrittura
-function setReadOnlyUI(readOnly) {
-  const targets = [btnImposta, btnAggiungi, btnReset];
-  targets.forEach(el=>{
-    if(!el) return;
-    el.disabled = readOnly;
-    el.style.opacity = readOnly ? 0.5 : 1;
-    el.style.pointerEvents = readOnly ? 'none' : 'auto';
-  });
-
-  // disabilita bottoni "Elimina" in tabella
-  if (rowsTable) {
-    rowsTable.querySelectorAll('button').forEach(b=>{
-      b.disabled = readOnly;
-      b.style.opacity = readOnly ? 0.5 : 1;
-      b.style.pointerEvents = readOnly ? 'none' : 'auto';
-    });
-  }
-
-  statusSpan.textContent = readOnly ? 'sola lettura' : 'ADMIN';
-  statusSpan.style.background = readOnly ? '#eee' : '#ffe3cc';
-}
-
-// barra admin (login/logout + stato)
-const adminBar = document.createElement('div');
-adminBar.style.display = 'flex';
-adminBar.style.justifyContent = 'center';
-adminBar.style.margin = '12px 0';
-
-const adminBtn = document.createElement('button');
-adminBtn.className = 'admin-btn';
-adminBtn.textContent = isAdmin ? '🔓 Esci da Admin' : '🔐 Login Admin';
-
-const statusSpan = document.createElement('span');
-statusSpan.className = 'admin-badge';
-statusSpan.textContent = isAdmin ? 'ADMIN' : 'sola lettura';
-
-adminBar.appendChild(adminBtn);
-adminBar.appendChild(statusSpan);
-document.body.appendChild(adminBar);
-
-// login/logout
-adminBtn.onclick = ()=>{
-  if (isAdmin) {
-    isAdmin = false;
-    localStorage.setItem('barapp:isAdmin','false');
-    adminBtn.textContent = '🔐 Login Admin';
-    setReadOnlyUI(true);
-    alert('Sei uscito dalla modalità Admin.');
-  } else {
-    const pin = prompt('Inserisci PIN admin:');
-    if (pin === ADMIN_PIN) {
-      isAdmin = true;
-      localStorage.setItem('barapp:isAdmin','true');
-      adminBtn.textContent = '🔓 Esci da Admin';
-      setReadOnlyUI(false);
-      alert('Accesso Admin riuscito.');
-    } else if (pin !== null) {
-      alert('PIN errato.');
+  <!-- STILI -->
+  <style>
+    :root{
+      --brand:#ff7a00;    /* colore principale */
+      --brand-ink:#8a3d00;
+      --bg:#fff8f0;       /* sfondo caldo */
+      --card:#ffffff;
+      --ink:#1f1f1f;
+      --muted:#6b6b6b;
+      --ring:#e9e9e9;
     }
-  }
-};
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background:var(--bg);
+    }
 
-// stato iniziale: sola lettura se non admin
-setReadOnlyUI(!isAdmin);
-</script>
+    /* Header */
+    header{
+      position:sticky; top:0; z-index:10;
+      background: linear-gradient(135deg, var(--brand), #ff9c3a);
+      color:#fff; padding:16px;
+      box-shadow:0 4px 16px rgba(0,0,0,.12);
+    }
+    header .title{
+      font-weight:800; letter-spacing:.3px; font-size:18px; margin:0;
+    }
+
+    main{ max-width: 900px; margin:0 auto; padding:16px }
+
+    /* Navigazione mese */
+    .monthNav{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      background:var(--card); border:1px solid var(--ring); border-radius:14px; padding:12px 12px;
+      box-shadow:0 6px 18px rgba(0,0,0,.04);
+      margin-top:12px;
+    }
+    .pill{padding:6px 12px; background:#ffe6d1; color:var(--brand-ink); border-radius:999px; font-weight:700}
+    .btn{
+      cursor:pointer; border:0; padding:10px 12px; border-radius:10px; font-weight:600;
+      background:#f0f0f0; color:#222;
+    }
+    .btn.primary{ background:var(--brand); color:#fff }
+    .btn.danger{ background:#e53935; color:#fff }
+
+    /* Cards & layout */
+    .grid{ display:grid; grid-template-columns:1fr; gap:14px; margin-top:14px }
+    @media(min-width: 860px){ .grid{ grid-template-columns: 1fr 1fr } }
+    .card{
+      background:var(--card); border:1px solid var(--ring); border-radius:14px; padding:16px;
+      box-shadow:0 6px 18px rgba(0,0,0,.04);
+    }
+    h2{ margin:0 0 8px 0; font-size:18px }
+
+    label{ display:block; font-size:14px; color:var(--muted); margin-bottom:6px }
+    input[type="number"], input[type="date"]{
+      width:100%; padding:12px; border:1px solid var(--ring); border-radius:10px; font-size:16px; outline:none;
+      background:#fff;
+    }
+    input[type="number"]:focus, input[type="date"]:focus{ border-color:var(--brand) }
+
+    .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+    .row > *{ flex:1 }
+
+    /* KPI */
+    .kpi{ display:flex; justify-content:space-between; align-items:baseline; margin:6px 0 }
+    .kpi .label{ color:var(--muted); font-size:14px }
+    .kpi .value{ font-weight:800; font-size:22px }
+
+    /* Barra di avanzamento */
+    .progress-wrap{ background:#eee; border-radius:999px; overflow:hidden; height:18px; margin-top:8px }
+    .progress{ background:var(--brand); height:100%; width:0%; color:#fff; text-align:center; font-size:12px; line-height:18px; transition:width .4s }
+
+    /* Tabella */
+    table{ width:100%; border-collapse:collapse; font-size:14px }
+    th, td{ padding:8px; border-bottom:1px dashed #e6e6e6; text-align:center }
+    th{ color:#777; font-weight:700; background:#fafafa }
+
+    /* Admin badge & button */
+    .admin-badge {font-size:12px;background:#eee;padding:6px 10px;border-radius:999px;margin-left:8px}
+    .admin-btn {background:#f0f0f0;color:#222;border:0;padding:10px 12px;border-radius:10px;cursor:pointer}
+    .admin-btn[disabled]{opacity:.5;pointer-events:none}
+
+    footer{ padding:24px 16px; color:#777; text-align:center }
+    .muted{ color:var(--muted) }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="title">📊 Obiettivo Mensile — Bar</p>
+  </header>
+
+  <main>
+    <!-- Navigazione mese -->
+    <div class="monthNav">
+      <button class="btn" id="prevBtn">◀︎ Mese prec.</button>
+      <div class="pill" id="monthLabel">Mese Anno</div>
+      <button class="btn" id="nextBtn">Mese succ. ▶︎</button>
+    </div>
+
+    <div class="grid">
+      <!-- Impostazioni & Inserimento -->
+      <section class="card">
+        <h2>Impostazioni & Inserimento</h2>
+        <label for="goalInput">Obiettivo mensile (€)</label>
+        <div class="row">
+          <input type="number" id="goalInput" min="0" step="0.01" placeholder="Es. 30000">
+          <button class="btn primary" id="saveGoalBtn">Imposta</button>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label for="dateInput">Data</label>
+            <input type="date" id="dateInput">
+          </div>
+          <div>
+            <label for="amountInput">Incasso giornaliero (€)</label>
+            <input type="number" id="amountInput" min="0" step="0.01" placeholder="Es. 500">
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="addBtn">Aggiungi</button>
+          <button class="btn" id="quick50" type="button">+50</button>
+          <button class="btn" id="quick100" type="button">+100</button>
+        </div>
+
+        <p class="muted" style="margin-top:8px">I dati sono salvati nel browser per ogni mese (localStorage per dispositivo).</p>
+      </section>
+
+      <!-- Dashboard -->
+      <section class="card">
+        <h2>Stato del mese</h2>
+        <div class="kpi"><div class="label">Obiettivo</div><div class="value" id="goalVal">€0</div></div>
+        <div class="kpi"><div class="label">Incassi totali</div><div class="value" id="totalVal">€0</div></div>
+        <div class="kpi"><div class="label">Bonus 5%</div><div class="value" id="bonusVal">€0</div></div>
+
+        <div class="progress-wrap" style="margin-top:8px">
+          <div class="progress" id="progressBar">0%</div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="exportBtn">⬇︎ Esporta CSV</button>
+          <button class="btn danger" id="resetBtn">🔄 Reset mese</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Grafico -->
+    <section class="card">
+      <h2>Storico giornaliero</h2>
+      <div style="height:220px">
+        <canvas id="chart"></canvas>
+      </div>
+    </section>
+
+    <!-- Tabella -->
+    <section class="card">
+      <h2>Dettagli incassi</h2>
+      <table>
+        <thead><tr><th>Data</th><th>Incasso (€)</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>© App incassi — uso interno</footer>
+
+  <!-- ===== SCRIPT PRINCIPALE: salvataggio locale per mese + UI ===== -->
+  <script>
+    // ======= Utility =======
+    const fmt = (n)=> new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR'}).format(Number(n||0));
+    const monthKey = (d)=> d.toISOString().slice(0,7); // YYYY-MM
+    let currentMonth = monthKey(new Date());
+
+    // ======= Storage helpers (per mese) =======
+    function kGoal(m){ return \`barapp:goal:\${m}\` }
+    function kEntries(m){ return \`barapp:entries:\${m}\` }
+
+    function loadGoal(m){ return Number(localStorage.getItem(kGoal(m))||0) }
+    function saveGoal(m,v){ localStorage.setItem(kGoal(m), String(v)) }
+
+    function loadEntries(m){
+      try{ return JSON.parse(localStorage.getItem(kEntries(m))||'[]') }catch(e){ return [] }
+    }
+    function saveEntries(m,arr){
+      localStorage.setItem(kEntries(m), JSON.stringify(arr))
+    }
+
+    // ======= Riferimenti UI =======
+    const monthLabel = document.getElementById('monthLabel');
+    const goalInput = document.getElementById('goalInput');
+    const saveGoalBtn = document.getElementById('saveGoalBtn');
+    const dateInput = document.getElementById('dateInput');
+    const amountInput = document.getElementById('amountInput');
+    const addBtn = document.getElementById('addBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    const goalVal = document.getElementById('goalVal');
+    const totalVal = document.getElementById('totalVal');
+    const bonusVal = document.getElementById('bonusVal');
+    const progressBar = document.getElementById('progressBar');
+    const rows = document.getElementById('rows');
+
+    // Chart
+    const ctx = document.getElementById('chart').getContext('2d');
+    let chart = new Chart(ctx, {
+      type:'bar',
+      data:{ labels:[], datasets:[{ label:'Incasso giornaliero (€)', data:[], backgroundColor:'#ff7a00' }] },
+      options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
+    });
+
+    function setMonth(m){
+      currentMonth = m;
+      if(monthLabel){
+        const [yy,mm] = m.split('-');
+        const it = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+        monthLabel.textContent = \`\${it[Number(mm)-1]} \${yy}\`;
+      }
+      // data di default dentro il mese
+      const today = new Date();
+      if (monthKey(today)!==m) {
+        dateInput.value = \`\${m}-01\`;
+      } else {
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth()+1).padStart(2,'0');
+        const dd = String(today.getDate()).padStart(2,'0');
+        dateInput.value = \`\${yyyy}-\${mm}-\${dd}\`;
+      }
+      render();
+    }
+
+    function render(){
+      const goal = loadGoal(currentMonth);
+      const entries = loadEntries(currentMonth);
+      goalInput.value = goal || '';
+      goalVal.textContent = fmt(goal);
+
+      const total = entries.reduce((s,e)=> s + Number(e.amount||0), 0);
+      totalVal.textContent = fmt(total);
+      bonusVal.textContent = fmt(total * 0.05);
+
+      let pct = goal>0 ? Math.min(100, (total/goal)*100) : 0;
+      progressBar.style.width = pct.toFixed(1) + '%';
+      progressBar.textContent  = Math.floor(pct) + '%';
+
+      // tabella
+      rows.innerHTML = '';
+      entries
+        .slice()
+        .sort((a,b)=> a.date.localeCompare(b.date))
+        .forEach((e,i)=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = \`
+            <td>\${e.date}</td>
+            <td>\${Number(e.amount).toFixed(2)}</td>
+            <td><button class="btn" data-i="\${i}">Elimina</button></td>\`;
+          rows.appendChild(tr);
+        });
+      rows.querySelectorAll('button[data-i]').forEach(btn=>{
+        btn.onclick = ()=>{
+          const arr = loadEntries(currentMonth);
+          arr.splice(Number(btn.dataset.i),1);
+          saveEntries(currentMonth, arr);
+          render();
+        };
+      });
+
+      // chart per giorno
+      const byDay = {};
+      for(const e of entries){ byDay[e.date] = (byDay[e.date]||0) + Number(e.amount||0) }
+      const labels = Object.keys(byDay).sort();
+      const data = labels.map(d=> byDay[d]);
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = data;
+      chart.update();
+    }
+
+    function addEntry(dateStr, amount){
+      if(!dateStr){ alert('Seleziona una data'); return }
+      const val = Number(amount);
+      if(!(val>0)){ alert('Inserisci un importo valido'); return }
+      const entries = loadEntries(currentMonth);
+      entries.push({ date: dateStr, amount: val });
+      saveEntries(currentMonth, entries);
+      amountInput.value = '';
+      render();
+    }
+
+    // Eventi
+    document.getElementById('quick50').onclick  = ()=>{ amountInput.value = '50';  addBtn.click(); };
+    document.getElementById('quick100').onclick = ()=>{ amountInput.value = '100'; addBtn.click(); };
+
+    saveGoalBtn.onclick = ()=>{
+      const v = Number(goalInput.value);
+      if(!(v>0)){ alert('Imposta un obiettivo maggiore di 0'); return; }
+      saveGoal(currentMonth, v);
+      render();
+      alert('Obiettivo salvato');
+    };
+
+    addBtn.onclick = ()=> addEntry(dateInput.value, amountInput.value);
+
+    resetBtn.onclick = ()=>{
+      if(!confirm('Cancellare tutti i dati del mese?')) return;
+      saveEntries(currentMonth, []);
+      render();
+    };
+
+    exportBtn.onclick = ()=>{
+      const entries = loadEntries(currentMonth);
+      if(!entries.length){ alert('Nessun dato da esportare'); return; }
+      let csv = 'Data,Incasso\n' + entries
+        .sort((a,b)=>a.date.localeCompare(b.date))
+        .map(e=> \`\${e.date},\${Number(e.amount).toFixed(2)}\`).join('\\n');
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=\`incassi_\${currentMonth}.csv\`; a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    prevBtn.onclick = ()=>{
+      const [y,m] = currentMonth.split('-').map(Number);
+      const d = new Date(y, m-2, 1);
+      setMonth(monthKey(d));
+    };
+    nextBtn.onclick = ()=>{
+      const [y,m] = currentMonth.split('-').map(Number);
+      const d = new Date(y, m, 1);
+      setMonth(monthKey(d));
+    };
+
+    // Boot
+    (function init(){
+      setMonth(currentMonth);
+    })();
+  </script>
+
+  <!-- ===== SCRIPT: LOGIN ADMIN CON PIN (sola lettura per altri) ===== -->
+  <script>
+    // Cambia il PIN qui
+    const ADMIN_PIN = '1234';
+
+    const btnImposta = document.getElementById('saveGoalBtn');
+    const btnAggiungi = document.getElementById('addBtn');
+    const btnReset = document.getElementById('resetBtn');
+    const rowsTable = document.getElementById('rows');
+
+    let isAdmin = localStorage.getItem('barapp:isAdmin') === 'true';
+
+    function setReadOnlyUI(readOnly) {
+      [btnImposta, btnAggiungi, btnReset].forEach(el=>{
+        if(!el) return;
+        el.disabled = readOnly;
+        el.style.opacity = readOnly ? 0.5 : 1;
+        el.style.pointerEvents = readOnly ? 'none' : 'auto';
+      });
+      if (rowsTable) {
+        rowsTable.querySelectorAll('button').forEach(b=>{
+          b.disabled = readOnly;
+          b.style.opacity = readOnly ? 0.5 : 1;
+          b.style.pointerEvents = readOnly ? 'none' : 'auto';
+        });
+      }
+      statusSpan.textContent = readOnly ? 'sola lettura' : 'ADMIN';
+      statusSpan.style.background = readOnly ? '#eee' : '#ffe3cc';
+    }
+
+    // Barra admin
+    const adminBar = document.createElement('div');
+    adminBar.style.display = 'flex';
+    adminBar.style.justifyContent = 'center';
+    adminBar.style.margin = '12px 0';
+
+    const adminBtn = document.createElement('button');
+    adminBtn.className = 'admin-btn';
+    adminBtn.textContent = isAdmin ? '🔓 Esci da Admin' : '🔐 Login Admin';
+
+    const statusSpan = document.createElement('span');
+    statusSpan.className = 'admin-badge';
+    statusSpan.textContent = isAdmin ? 'ADMIN' : 'sola lettura';
+
+    adminBar.appendChild(adminBtn);
+    adminBar.appendChild(statusSpan);
+    document.body.appendChild(adminBar);
+
+    adminBtn.onclick = ()=>{
+      if (isAdmin) {
+        isAdmin = false;
+        localStorage.setItem('barapp:isAdmin','false');
+        adminBtn.textContent = '🔐 Login Admin';
+        setReadOnlyUI(true);
+        alert('Sei uscito dalla modalità Admin.');
+      } else {
+        const pin = prompt('Inserisci PIN admin:');
+        if (pin === ADMIN_PIN) {
+          isAdmin = true;
+          localStorage.setItem('barapp:isAdmin','true');
+          adminBtn.textContent = '🔓 Esci da Admin';
+          setReadOnlyUI(false);
+          alert('Accesso Admin riuscito.');
+        } else if (pin !== null) {
+          alert('PIN errato.');
+        }
+      }
+    };
+
+    // stato iniziale
+    setReadOnlyUI(!isAdmin);
+  </script>
+
+  <!-- ===== (OPZIONALE) REGISTRAZIONE SERVICE WORKER PER PWA ===== -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(console.error);
+    }
+  </script>
 </body>
 </html>
