@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+  <link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -15,6 +18,11 @@
   .progress-bar { height:25px; background:#ff6600; width:0%; color:#fff; text-align:center; line-height:25px; transition:width .4s; }
 </style>
 </head>
+  <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(console.error);
+}
+</script>
 <body>
 
 <h1>📊 Obiettivo Mensile</h1>
